@@ -4,21 +4,24 @@ import br.com.safeguard.check.SafeguardCheck;
 import br.com.safeguard.interfaces.Check;
 import br.com.safeguard.types.ParametroTipo;
 import com.example.CNPJValidator.consumers.ReceitaConsumer;
-import com.example.CNPJValidator.entities.CNPJ;
-import com.example.CNPJValidator.entities.HistoryRequest;
+import com.example.CNPJValidator.model.CNPJ;
+import com.example.CNPJValidator.model.HistoryRequest;
+import com.example.CNPJValidator.repository.HistoryRequestRepository;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 @RestController
-public class ValidationController {
+public  class ValidationController {
 
-    List<HistoryRequest> history = new ArrayList<>();
+    //private List<HistoryRequest> history = new ArrayList<>();
+    //private final History history = new History();
+
+    @Autowired
+    private HistoryRequestRepository historyRequestRepository;
 
     @GetMapping("/validate")
     public String validate(@RequestParam(value = "cnpj") String cnpj , HttpServletResponse response) {
@@ -55,11 +58,7 @@ public class ValidationController {
 
     private void saveHistory(String cnpj, String method, Object result) {
 
-        HistoryRequest histReq = new HistoryRequest();
-        histReq.setCnpj(new CNPJ(cnpj));
-        histReq.setMethod(method);
-        histReq.setReply(result);
-        history.add(histReq);
+        saveHistory(new CNPJ(cnpj),method,result);
 
     }
 
@@ -69,7 +68,8 @@ public class ValidationController {
         histReq.setCnpj(cnpj);
         histReq.setMethod(method);
         histReq.setReply(result);
-        history.add(histReq);
+        historyRequestRepository.save(histReq);
+
 
     }
 
@@ -109,9 +109,9 @@ public class ValidationController {
 
 
     @GetMapping ("/history")
-    public List<HistoryRequest> history ()
+    public Object history ()
     {
-        return history;
+        return historyRequestRepository.findAll();
     }
 
     private String removeCnpjSpecialChars(String cnpj) {
