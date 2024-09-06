@@ -16,6 +16,7 @@ public class CNPJ implements Serializable {
     private int id;
     private int raiz;
     private int ordem;
+    private long fullCnpj;
 
 
     public int getRaiz() {
